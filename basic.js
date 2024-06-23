@@ -20,13 +20,13 @@ inputEl.oninput = async function(){
     // }
 
     if (!meals) {
-        displayErrorMessage("Meal not found", true);
+        displayErrorMessage("Meal not found !", true);
     } else {
         result = [...meals];
         displayErrorMessage("", false);
         displayResult(result);
     }
-    console.log(result);
+    // console.log(result,input);
     if(!input){
         resultBox.innerHTML="";
     }
@@ -45,8 +45,11 @@ let searchresult=[];
 async function getDetails(i){
     let meal= await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${i}`);
     meal= await meal.json();
+    console.log(meal);
     meal=meal.meals;
-    searchresult=[...meal]
+    console.log(meal);
+    // searchresult=[...meal]
+    // console.log(searchresult);
     return meal
 }
 function displayResult(result){
@@ -63,7 +66,7 @@ async function selectInput(list) {
     resultBox.innerHTML="";
     mealContEl.innerHTML="";
     const mealCards=meals.map((meal,i)=>{
-        meals[i]=meal
+        // meals[i]=meal
         return  `<div class="meal-Card">
         <img src="${meal.strMealThumb}" alt="Meal-Image"/>
         <h3>${meal.strMeal}</h3>
@@ -76,10 +79,15 @@ async function selectInput(list) {
     mealContEl.innerHTML=mealCards.join('');
 
 }
-searchBtn.addEventListener("click",function(event){
+searchBtn.addEventListener("click", async function(event){
     event.preventDefault();
+    result = await getDetails(inputEl.value);
     console.log(result);
-    resultBox.innerHTML="";
+    if (!result) {
+        displayErrorMessage("Oops The Meal you are searching is not found ! Please search another meal ", true);
+    }
+    else {
+        resultBox.innerHTML="";
     const mealCards=result.map((meal,i)=>{
         mealss[i]=meal
         return  `<div class="meal-Card">
@@ -92,6 +100,7 @@ searchBtn.addEventListener("click",function(event){
     </div>`
     });
     mealContEl.innerHTML=mealCards.join('');
+    }
 });
 inputEl.addEventListener("onkeydown",function(event){
     event.preventDefault();
@@ -112,7 +121,7 @@ inputEl.addEventListener("onkeydown",function(event){
 });
 
 function moreDetails(i,event){
-    let meal=searchresult[i];
+    let meal=result[i];
     console.log(meal);
     mealBodyEL.style.display="none";
     const mealPopup=document.getElementById('mealPopup');
@@ -120,8 +129,9 @@ function moreDetails(i,event){
             <img id="popup-image" src="${meal.strMealThumb}" alt="Meal Image">
             <h3 id="popup-mealname">${meal.strMeal}</h3>
             <p id="popup-instructions">${meal.strInstructions}</p>
-            <button type="button" class="youtube" onclick="window.open(${meal.strYoutube}, '_blank')">View Recipe On YouTube</button>
+            <button type="button" class="youtube" onclick="window.open('${meal.strYoutube}', '_blank')">View Recipe On YouTube</button>
             `
+    console.log(meal.strYoutube);
     mealPopup.innerHTML=popupcard;
     mealPopup.style.display="block";
 }
@@ -132,7 +142,7 @@ function closePopup() {
 }
 
 function AddtoFav(i,event){
-    let meal=meals[i];
+    let meal=result[i];   
     console.log(meal);
     const foundIndex=favitems.findIndex(fmeal=>fmeal.idMeal==meal.idMeal);
     const favBtn=event.target;
